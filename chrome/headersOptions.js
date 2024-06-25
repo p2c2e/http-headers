@@ -11,6 +11,21 @@
 
 'use strict';
 
+// import { parseKeyValueString } from "./utils.js";
+
+// // Example usage:
+// const input = `
+// # This is a comment
+// key1: value1
+// key2: value2
+//     # Another comment with spaces
+// key3: value3
+// key1: value4 # duplicate key, last one wins
+// key4: # no value, should be empty string
+// `;
+//
+// console.log(parseKeyValueString(input));
+
 // Saves options to chrome.storage
 function save_options() {
 	let newSettings = {
@@ -18,7 +33,8 @@ function save_options() {
 		'o_live_output': null,
 		'o_live_direction': [],
 		'o_live_type': [],
-		'o_live_donation': null,		
+		'o_live_donation': null,
+		'o_addl_headers': ""
 	};
 
 	for (let i = 0; i < document.getElementsByName('o_theme').length; i++) {
@@ -46,6 +62,16 @@ function save_options() {
 			newSettings.o_live_donation = document.getElementsByName('o_live_donation')[i].id;
 		}
 	}
+	console.log("NEW CODE")
+	for (let i = 0; i < document.getElementsByName('o_addl_headers').length; i++) {
+		console.log("In")
+		if (document.getElementsByName('o_addl_headers')[i].value) {
+			console.log("In 2")
+			console.log(document.getElementsByName('o_addl_headers')[i].value)
+			newSettings.o_addl_headers = document.getElementsByName('o_addl_headers')[i].value;
+			console.log("out 2")
+		}
+	}
 
   chrome.storage.sync.set(
   	newSettings, 
@@ -57,7 +83,8 @@ function save_options() {
 	    }, 1550);
   	}
   );
-
+	console.log("Saving ....");
+	console.log(newSettings);
  	chrome.extension.getBackgroundPage().currentSettings = newSettings;
 }
 
@@ -76,7 +103,9 @@ function restore_options() {
  				document.getElementById(settings.o_live_type[i]).checked = true;
  			}
  			document.getElementById(settings.o_live_donation).checked = true;
-
+			 console.log("Loading ....");
+			 console.log(settings.o_addl_headers)
+			document.getElementById("o_addl_headers").value = settings.o_addl_headers;
  			chrome.extension.getBackgroundPage().currentSettings = settings;
  		}
  	);

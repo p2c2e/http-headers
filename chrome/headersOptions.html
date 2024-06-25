@@ -212,6 +212,10 @@
 					<label for="o_live_donation_show">Show:<input type="radio" name="o_live_donation" id="o_live_donation_show"></label>
 					<label for="o_live_donation_hide">Hide:<input type="radio" name="o_live_donation" id="o_live_donation_hide"></label>
 				</div>
+				<div>
+					<h3>Additional Headers (key: value - one per line)</h3>
+					<textarea id="o_addl_headers" name="o_addl_headers" rows="5" style="width: 500px"></textarea>
+				</div>
 				<div class="option">
 					<button id="save">Apply &amp; Save Options</button>
 					<button id="defaults">Restore Defaults</button>
@@ -265,6 +269,8 @@
 		</div>
 	</div>
 
+	<script type="module" src="utils.js"></script>
 	<script src="headersOptions.js"></script>
+
 </body>
 </html>

@@ -11,6 +11,41 @@
 
 'use strict';
 
+// import { parseKeyValueString } from "./utils.js";
+function parseKeyValueString(input) {
+	const lines = input.split('\n');
+	const result = {};
+
+	for (let line of lines) {
+		// Trim leading and trailing spaces
+		line = line.trim();
+
+		// Ignore lines that are comments (consider spaces/tabs before the # symbol)
+		if (/^\s*#/.test(line)) {
+			continue;
+		}
+
+		// Ignore inline comments
+		if (line.includes('#')) {
+			line = line.split('#')[0].trim();
+		}
+
+		const [key, ...valueParts] = line.split(':');
+
+		// Trim key and join the value parts (in case ':' appears in the value)
+		const trimmedKey = key.trim();
+		const trimmedValue = valueParts.join(':').trim();
+
+		// Set the key-value pair in the result object
+		if (trimmedKey) {
+			result[trimmedKey] = trimmedValue;
+		}
+	}
+	console.log("RESULTS ");
+	console.log(result);
+	return result;
+}
+
 const DOM = {
 	'toggleButton' : document.getElementById('toggleButton'),
 	'resetButton' : document.getElementById('resetButton'),
@@ -209,6 +244,57 @@ chrome.webRequest.onHeadersReceived.addListener(function (details) {
   urls: ["<all_urls>"],
   types: ["main_frame", "sub_frame", "stylesheet", "script", "image", "object", "xmlhttprequest", "other"]
 }, ["blocking", "responseHeaders"]);
+
+console.log(">>>>>>>>>> MY CODE BLOCK <<<<<<<<<<<<<<<<<<<,")
+var filters = {
+	urls: ["<all_urls>"],
+	types: ["main_frame"]
+};
+var handler = function(details) {
+
+	var isRefererSet = false;
+	var headers = details.requestHeaders,
+		blockingResponse = {};
+
+	// for (var i = 0, l = headers.length; i < l; ++i) {
+	// 	if (headers[i].name == 'Referer') {
+	// 		headers[i].value = "http://your-url.com/";
+	// 		isRefererSet = true;
+	// 		break;
+	// 	}
+	// }
+		var addl_headers = chrome.extension.getBackgroundPage().currentSettings.o_addl_headers;
+		addl_headers = parseKeyValueString(addl_headers);
+
+		console.log("addl_headers", addl_headers);
+		Object.keys(addl_headers).forEach(key => {
+			let value = addl_headers[key];
+			console.log("Pushing "+key+" : "+value);
+			headers.push({
+				name: key,
+				value: value
+			});
+		});
+		// $.each(addl_headers, function (key, value) {
+		// 	console.log("Pushing "+key+" : "+value);
+		// 	headers.push({
+		// 		name: key,
+		// 		value: value
+		// 	});
+		// });
+	// if (!isRefererSet) {
+	headers.push({
+		name: "CUSTOM-AUTH",
+		value: "Auth Token"
+	});
+	// }
+
+	blockingResponse.requestHeaders = headers;
+	return blockingResponse;
+};
+var extraInfoSpec = ['requestHeaders', 'blocking'];
+chrome.webRequest.onBeforeSendHeaders.addListener(handler, filters, extraInfoSpec);
+console.log(">>>>>>>>>> MY CODE END <<<<<<<<<<<<<<<<<<<,")
 
 chrome.webRequest.onSendHeaders.addListener(function (details) {
 	if (generate_dom.shouldPrint(details) === false) { 
